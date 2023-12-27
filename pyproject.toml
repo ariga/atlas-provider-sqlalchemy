@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "atlas-provider-sqlalchemy"
+version = "0.1.0"
+description = "Load sqlalchemy models into an Atlas project."
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+sqlalchemy = "^2.0.21"
+typer = {extras = ["all"], version = "^0.9.0"}
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.2"
+autopep8 = "^2.0.4"
+mypy = "^1.5.1"
+
+[tool.poetry.scripts]
+atlas-provider-sqlalchemy = "cli.main:app"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
