@@ -46,7 +46,7 @@ def get_declarative_base(models_dir: Path, debug: bool = False) -> Type[Declarat
             models.update(classes)
     try:
         model = models.pop()
-    except KeyError as e:
+    except KeyError:
         raise ModelsNotFoundError(
             'Found no sqlalchemy models in the directory tree.')
     return model
