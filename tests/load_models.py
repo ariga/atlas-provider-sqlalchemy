@@ -1,6 +1,6 @@
 import sys
 
-from cli.main import print_ddl
+from atlas_provider_sqlalchemy.ddl import print_ddl
 from tests.models.models import User, Address
 
 # get the dialect from the command line
