@@ -1,11 +1,35 @@
+variable "dialect" {
+  type = string
+}
+
+locals {
+  dev_url = {
+    mysql = "docker://mysql/8/dev"
+    postgresql = "docker://postgres/15"
+    sqlite = "sqlite://file::memory:?cache=shared"
+  }[var.dialect]
+}
+
 data "external_schema" "sqlalchemy" {
   program = [
-    "atlas-provider-sqlalchemy",
-    "--dialect", "mysql", // mysql | mariadb | postgresql | sqlite | mssql
+    "poetry",
+    "run",
+    "python3",
+    "../cli/main.py",
+    "--path", "models",
+    "--dialect", var.dialect, // mysql | postgresql | sqlite | mssql+pyodbc
   ]
 }
 
 env "sqlalchemy" {
   src = data.external_schema.sqlalchemy.url
-  dev = "docker://mysql/8/dev"
+  dev = local.dev_url
+  migration {
+    dir = "file://migrations/${var.dialect}"
+  }
+  format {
+    migrate {
+      diff = "{{ sql . \"  \" }}"
+    }
+  }
 }
