@@ -58,7 +58,7 @@ def dump_ddl(dialect_driver: str, base: Type[DeclarativeBase]) -> Type[Declarati
     """
 
     def dump(sql, *multiparams, **params):
-        print(str(sql.compile(dialect=engine.dialect)).replace('\t', '').replace('\n', ''), end=';')
+        print(str(sql.compile(dialect=engine.dialect)).replace('\t', '').replace('\n', ''), end=';\n\n')
 
     engine = create_mock_engine(f'{dialect_driver}://', dump)
     base.metadata.create_all(engine, checkfirst=False)

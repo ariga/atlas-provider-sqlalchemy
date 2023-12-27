@@ -14,7 +14,6 @@ def test_run_postgres(capsys):
     base = run(POSTGRES_DIALECT)
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
-    capsys.close()
     base.metadata.clear()
 
 
@@ -25,7 +24,6 @@ def test_run_mysql(capsys):
     base = run(MYSQL_DIALECT)
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
-    capsys.close()
     base.metadata.clear()
 
 
@@ -56,5 +54,4 @@ def test_get_declarative_base_debug_empty(capsys):
     base = get_declarative_base(models_dir, debug=True)
     captured = capsys.readouterr()
     assert captured.out == ''
-    capsys.close()
     base.metadata.clear()

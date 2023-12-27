@@ -1,7 +1,10 @@
 from typing import List, Optional
 from sqlalchemy import ForeignKey, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from tests.models.base import Base
+from sqlalchemy.orm import Mapped, mapped_column, relationship, DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 class User(Base):
