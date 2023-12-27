@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Load sqlalchemy models into an Atlas project."
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
+packages = [{include = "cli", from = "."}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
