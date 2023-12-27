@@ -15,9 +15,8 @@ data "external_schema" "sqlalchemy" {
     "poetry",
     "run",
     "python3",
-    "../cli/main.py",
-    "--path", "models",
-    "--dialect", var.dialect, // mysql | postgresql | sqlite | mssql+pyodbc
+    "load_models.py",
+    var.dialect, // mysql | postgresql | sqlite | mssql+pyodbc
   ]
 }
 
