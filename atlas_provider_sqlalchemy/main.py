@@ -26,7 +26,7 @@ def run(dialect: Dialect, path: Path, debug: bool = False) -> Type[DeclarativeBa
 @app.command()
 def load(dialect: Dialect = Dialect.mysql,
          path: Optional[Path] = typer.Option(None, exists=True, help="Path to directory of the sqlalchemy models."),
-         debug: bool = True):
+         debug: bool = False):
     if path is None:
         path = Path(os.getcwd())
     run(dialect, path, debug)
