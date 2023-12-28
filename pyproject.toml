@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Load sqlalchemy models into an Atlas project."
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
+packages = [{include = "atlas_provider_sqlalchemy"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
@@ -17,7 +18,7 @@ autopep8 = "^2.0.4"
 mypy = "^1.5.1"
 
 [tool.poetry.scripts]
-atlas-provider-sqlalchemy = "cli.main:app"
+atlas-provider-sqlalchemy = "atlas_provider_sqlalchemy.main:app"
 
 [build-system]
 requires = ["poetry-core"]

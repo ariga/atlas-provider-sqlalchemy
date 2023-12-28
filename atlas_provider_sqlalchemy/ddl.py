@@ -1,7 +1,6 @@
 import os
 import importlib.util
 import inspect
-import typer
 from pathlib import Path
 from sqlalchemy import create_mock_engine
 from sqlalchemy.orm import DeclarativeBase
@@ -10,12 +9,6 @@ from typing import Type, Set, List
 
 class ModelsNotFoundError(Exception):
     pass
-
-
-def run(dialect: str, modles_dir: str = '', debug: bool = False) -> Type[DeclarativeBase]:
-    models_dir = Path(modles_dir) or Path(os.getcwd())
-    base = get_declarative_base(models_dir, debug)
-    return dump_ddl(dialect, base)
 
 
 def get_declarative_base(models_dir: Path, debug: bool = False) -> Type[DeclarativeBase]:
@@ -71,17 +64,5 @@ def get_import_path_from_path(path: Path, root_dir: Path) -> str:
     return import_path
 
 
-app = typer.Typer(no_args_is_help=True)
-
-
-@app.command()
-def load(dialect: str = typer.Option(default=...), path: str = '', debug: bool = False):
-    run(dialect, path, debug)
-
-
 def print_ddl(dialect_driver: str, models: List[Type[DeclarativeBase]]):
     dump_ddl(dialect_driver=dialect_driver, base=models[0])
-
-
-if __name__ == "__main__":
-    app(prog_name='atlas-provider-sqlalchemy')

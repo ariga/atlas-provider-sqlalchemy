@@ -1,0 +1,40 @@
+name: Publish to PyPI
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Version to publish, e.g. "0.1.2"
+        required: false
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  build_and_publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install poetry
+        uses: abatilo/actions-poetry@v2
+      - name: Set version env
+        id: set_version
+        ## if version is not provided as input, use the tag name
+        run: |
+          echo "tag=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          if [ -z "${{ github.event.inputs.version }}" ]; then
+              echo "tag=${{ github.ref }}" >> $GITHUB_OUTPUT
+          fi
+      - name: Set the package version
+        env:
+          RELEASE_VERSION: ${{ steps.set_version.outputs.tag }}
+        run: |
+          poetry version $RELEASE_VERSION
+      - name: Build and publish to pypi
+        uses: JRubics/poetry-publish@v1.17
+        with:
+          pypi_token: ${{ secrets.PYPI_TOKEN }}

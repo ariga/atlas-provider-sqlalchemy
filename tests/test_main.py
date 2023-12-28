@@ -1,4 +1,5 @@
-from cli.main import run, get_declarative_base, ModelsNotFoundError
+from atlas_provider_sqlalchemy.ddl import ModelsNotFoundError
+from atlas_provider_sqlalchemy.main import run, get_declarative_base
 from pathlib import Path
 from sqlalchemy.orm import DeclarativeBase
 import pytest
