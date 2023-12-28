@@ -12,12 +12,13 @@ app = typer.Typer(no_args_is_help=True)
 
 class Dialect(str, Enum):
     mysql = "mysql"
+    mariadb = "mariadb"
     postgresql = "postgresql"
     sqlite = "sqlite"
-    mssql = "mssql+pyodbc"
+    mssql = "mssql"
 
 
-def run(dialect: Dialect, path: Optional[Path], debug: bool = False) -> Type[DeclarativeBase]:
+def run(dialect: Dialect, path: Path, debug: bool = False) -> Type[DeclarativeBase]:
     base = get_declarative_base(path, debug)
     return dump_ddl(dialect.value, base)
 
