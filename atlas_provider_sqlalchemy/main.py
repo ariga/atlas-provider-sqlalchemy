@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+from typing import Optional
+from enum import Enum
 import typer
 from sqlalchemy.orm import DeclarativeBase
 from typing import Type
@@ -8,14 +10,25 @@ from atlas_provider_sqlalchemy.ddl import get_declarative_base, dump_ddl
 app = typer.Typer(no_args_is_help=True)
 
 
-def run(dialect: str, modles_dir: str = '', debug: bool = False) -> Type[DeclarativeBase]:
-    models_dir = Path(modles_dir) or Path(os.getcwd())
-    base = get_declarative_base(models_dir, debug)
-    return dump_ddl(dialect, base)
+class Dialect(str, Enum):
+    mysql = "mysql"
+    mariadb = "mariadb"
+    postgresql = "postgresql"
+    sqlite = "sqlite"
+    mssql = "mssql"
+
+
+def run(dialect: Dialect, path: Path, debug: bool = False) -> Type[DeclarativeBase]:
+    base = get_declarative_base(path, debug)
+    return dump_ddl(dialect.value, base)
 
 
 @app.command()
-def load(dialect: str = typer.Option(default=...), path: str = '', debug: bool = False):
+def load(dialect: Dialect = Dialect.mysql,
+         path: Optional[Path] = typer.Option(None, exists=True, help="Path to directory of the sqlalchemy models."),
+         debug: bool = True):
+    if path is None:
+        path = Path(os.getcwd())
     run(dialect, path, debug)
 
 
