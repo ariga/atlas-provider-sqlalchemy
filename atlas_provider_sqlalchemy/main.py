@@ -1,5 +1,7 @@
 import os
 from pathlib import Path
+from typing import Optional
+from enum import Enum
 import typer
 from sqlalchemy.orm import DeclarativeBase
 from typing import Type
@@ -8,14 +10,24 @@ from atlas_provider_sqlalchemy.ddl import get_declarative_base, dump_ddl
 app = typer.Typer(no_args_is_help=True)
 
 
-def run(dialect: str, modles_dir: str = '', debug: bool = False) -> Type[DeclarativeBase]:
-    models_dir = Path(modles_dir) or Path(os.getcwd())
-    base = get_declarative_base(models_dir, debug)
-    return dump_ddl(dialect, base)
+class Dialect(str, Enum):
+    mysql = "mysql"
+    postgresql = "postgresql"
+    sqlite = "sqlite"
+    mssql = "mssql+pyodbc"
+
+
+def run(dialect: Dialect, path: Optional[Path], debug: bool = False) -> Type[DeclarativeBase]:
+    base = get_declarative_base(path, debug)
+    return dump_ddl(dialect.value, base)
 
 
 @app.command()
-def load(dialect: str = typer.Option(default=...), path: str = '', debug: bool = False):
+def load(dialect: Dialect = Dialect.mysql, path: Optional[Path] = typer.Option(None), debug: bool = False):
+    if path is None:
+        path = Path(os.getcwd())
+    elif not path.exists():
+        raise typer.BadParameter(f'Path {path} does not exist.')
     run(dialect, path, debug)
 
 
