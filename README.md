@@ -123,6 +123,10 @@ The provider supports the following databases:
 * SQLite
 * Microsoft SQL Server
 
+### Credit
+
+The code in this repository is based on [noamtamir/atlas-provider-sqlalchemy](https://github.com/noamtamir/atlas-provider-sqlalchemy).
+
 ### Issues
 
 Please report any issues or feature requests in the [ariga/atlas](https://github.com/ariga/atlas/issues) repository.
