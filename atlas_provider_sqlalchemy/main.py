@@ -24,11 +24,11 @@ def run(dialect: Dialect, path: Path, debug: bool = False) -> Type[DeclarativeBa
 
 
 @app.command()
-def load(dialect: Dialect = Dialect.mysql, path: Optional[Path] = typer.Option(None), debug: bool = False):
+def load(dialect: Dialect = Dialect.mysql,
+         path: Optional[Path] = typer.Option(None, exists=True, help="Path to directory of the sqlalchemy models."),
+         debug: bool = True):
     if path is None:
         path = Path(os.getcwd())
-    elif not path.exists():
-        raise typer.BadParameter(f'Path {path} does not exist.')
     run(dialect, path, debug)
 
 
