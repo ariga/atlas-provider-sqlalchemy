@@ -11,7 +11,7 @@ class ModelsNotFoundError(Exception):
     pass
 
 
-def get_declarative_base(models_dir: Path, debug: bool = False) -> Type[DeclarativeBase]:
+def get_declarative_base(models_dir: Path, skip_errors: bool = False) -> Type[DeclarativeBase]:
     """
     Walk the directory tree starting at the root, import all models, and return 1 of them, as they all keep a
     reference to the Metadata object. The way sqlalchemy works, you must import all classes in order for them to be
@@ -29,20 +29,20 @@ def get_declarative_base(models_dir: Path, debug: bool = False) -> Type[Declarat
                     module = importlib.util.module_from_spec(module_spec)
                     module_spec.loader.exec_module(module)
             except Exception as e:
-                if debug:
-                    print(f'{e.__class__.__name__}: {str(e)}')
-                # TODO: handle nicer
+                if skip_errors:
+                    continue
+                print(f'{e.__class__.__name__}: {str(e)} in {file_path}')
+                print("To skip on failed import, run: atlas-provider-sqlalchemy --skip-errors")
+                exit(1)
                 continue
             classes = {c[1]
                        for c in inspect.getmembers(module, inspect.isclass)
                        if issubclass(c[1], DeclarativeBase) and c[1] is not DeclarativeBase}
             models.update(classes)
-    try:
-        model = models.pop()
-    except KeyError:
-        raise ModelsNotFoundError(
-            'Found no sqlalchemy models in the directory tree.')
-    return model
+    if not models:
+        print('Found no sqlalchemy models in the directory tree.')
+        exit(1)
+    return models.pop()
 
 
 def dump_ddl(dialect_driver: str, base: Type[DeclarativeBase]) -> Type[DeclarativeBase]:

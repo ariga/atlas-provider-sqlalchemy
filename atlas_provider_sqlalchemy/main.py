@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import Optional
 from enum import Enum
 import typer
 from sqlalchemy.orm import DeclarativeBase
@@ -18,18 +17,19 @@ class Dialect(str, Enum):
     mssql = "mssql"
 
 
-def run(dialect: Dialect, path: Path, debug: bool = False) -> Type[DeclarativeBase]:
-    base = get_declarative_base(path, debug)
+def run(dialect: Dialect, path: Path, skip_errors: bool = False) -> Type[DeclarativeBase]:
+    base = get_declarative_base(path, skip_errors)
     return dump_ddl(dialect.value, base)
 
 
 @app.command()
 def load(dialect: Dialect = Dialect.mysql,
-         path: Optional[Path] = typer.Option(None, exists=True, help="Path to directory of the sqlalchemy models."),
-         debug: bool = False):
+         path: Path = typer.Option(exists=True, help="Path to directory of the sqlalchemy models."),
+         skip_errors: bool = typer.Option(False, help="Skip errors when loading models.")
+         ):
     if path is None:
         path = Path(os.getcwd())
-    run(dialect, path, debug)
+    run(dialect, path, skip_errors)
 
 
 if __name__ == "__main__":
