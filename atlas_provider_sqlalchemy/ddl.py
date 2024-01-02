@@ -37,7 +37,7 @@ def get_declarative_base(models_dir: Path, skip_errors: bool = False) -> Type[De
                 continue
             classes = {c[1]
                        for c in inspect.getmembers(module, inspect.isclass)
-                       if issubclass(c[1], DeclarativeBase) and c[1] is not DeclarativeBase}
+                       if hasattr(c[1], "metadata") and c[1] is not DeclarativeBase}
             models.update(classes)
     if not models:
         print('Found no sqlalchemy models in the directory tree.')

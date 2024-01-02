@@ -22,9 +22,18 @@ def test_run_mysql(capsys):
     base.metadata.clear()
 
 
-def test_get_declarative_base():
-    base = get_declarative_base(Path("tests"), skip_errors=True)
-    assert issubclass(base, DeclarativeBase)
+def test_run_old_declarative_base(capsys):
+    with open('tests/ddl_mysql.sql', 'r') as f:
+        expected_ddl = f.read()
+    base = run(Dialect.mysql, Path("tests/old_models"))
+    captured = capsys.readouterr()
+    assert captured.out == expected_ddl
+    base.metadata.clear()
+
+
+def test_get_old_declarative_base():
+    base = get_declarative_base(Path("tests/old_models"))
+    assert not issubclass(base, DeclarativeBase)
     base.metadata.clear()
 
 

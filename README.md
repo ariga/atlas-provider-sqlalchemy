@@ -17,6 +17,8 @@ See [atlasgo.io](https://atlasgo.io/getting-started#installation) for more insta
 
 Install the provider by running:
 ```bash
+# The Provider works by importing your SQLAlchemy models and extracting the schema from them.
+# Therefore, you will need to run the provider from within your project's Python environment.
 pip install atlas-provider-sqlalchemy
 ```
 
