@@ -7,6 +7,7 @@ locals {
     mysql = "docker://mysql/8/dev"
     postgresql = "docker://postgres/15"
     sqlite = "sqlite://?mode=memory&_fk=1"
+    mssql = "docker://sqlserver/2022-latest"
   }[var.dialect]
 }
 
@@ -17,7 +18,7 @@ data "external_schema" "sqlalchemy" {
     "python3",
     "../atlas_provider_sqlalchemy/main.py",
     "--path", "models",
-    "--dialect", var.dialect, // mysql | postgresql | sqlite | mssql+pyodbc
+    "--dialect", var.dialect, // mysql | postgresql | sqlite | mssql
   ]
 }
 
