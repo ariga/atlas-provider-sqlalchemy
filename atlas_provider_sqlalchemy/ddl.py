@@ -2,15 +2,15 @@ import os
 import importlib.util
 import inspect
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
-from sqlalchemy import MetaData, create_mock_engine
+import sqlalchemy as sa
 
 
 class DBTableDesc(Protocol):
     """Database table description (SQLAlchemy table or model)."""
 
-    metadata: MetaData
+    metadata: sa.MetaData
 
 
 class ModuleImportError(Exception):
@@ -21,14 +21,29 @@ class ModelsNotFoundError(Exception):
     pass
 
 
-def get_metadata(db_dir: Path, skip_errors: bool = False) -> MetaData:
+def sqlalchemy_version() -> tuple[int, ...]:
+    """Get major and minor version of sqlalchemy."""
+
+    return tuple(int(x) for x in sa.__version__.split("."))
+
+
+def create_mock_engine(url: str, executor: Any) -> Any:
+    """Create a "mock" engine used for echoing DDL."""
+
+    if sqlalchemy_version() < (1, 4):
+        return sa.create_engine(url, strategy="mock", executor=executor)
+    else:
+        return sa.create_mock_engine(url, executor)
+
+
+def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
     """Walk the directory tree starting at the root, import all models and
     tables, and return metadata for one of them, as they all keep a reference
     to the `MetaData` object.  The way SQLAlchemy works, you must import all
     models and tables in order for them to be registered in metadata.
     """
 
-    metadata: set[MetaData] = set()
+    metadata: set[sa.MetaData] = set()
 
     for root, _, _ in os.walk(db_dir):
         python_file_paths = Path(root).glob("*.py")
@@ -50,7 +65,7 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> MetaData:
             ms = {
                 v.metadata
                 for (_, v) in inspect.getmembers(module)
-                if hasattr(v, "metadata") and isinstance(v.metadata, MetaData)
+                if hasattr(v, "metadata") and isinstance(v.metadata, sa.MetaData)
             }
             metadata.update(ms)
 
@@ -60,7 +75,7 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> MetaData:
     return metadata.pop()
 
 
-def dump_ddl(dialect_driver: str, metadata: MetaData) -> MetaData:
+def dump_ddl(dialect_driver: str, metadata: sa.MetaData) -> sa.MetaData:
     """Dump DDL statements for the given metadata to stdout."""
 
     def dump(sql, *multiparams, **params):

@@ -4,6 +4,7 @@ import pytest
 from pytest import CaptureFixture
 from sqlalchemy import MetaData
 
+from atlas_provider_sqlalchemy.ddl import sqlalchemy_version
 from atlas_provider_sqlalchemy.main import (
     Dialect,
     ModuleImportError,
@@ -13,6 +14,10 @@ from atlas_provider_sqlalchemy.main import (
 )
 
 
+@pytest.mark.skipif(
+    sqlalchemy_version() < (2, 0),
+    reason="requires SQLAlchemy>=2.0",
+)
 @pytest.mark.parametrize(
     "dialect, expected_ddl_file",
     [
@@ -20,19 +25,54 @@ from atlas_provider_sqlalchemy.main import (
         (Dialect.mysql, "tests/ddl_mysql.sql"),
     ],
 )
-@pytest.mark.parametrize(
-    "db_dir",
-    ["tests/models", "tests/old_models", "tests/tables"],
-)
 def test_run_models(
     dialect: Dialect,
     expected_ddl_file: str,
-    db_dir: str,
     capsys: CaptureFixture,
 ) -> None:
     with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read()
-    metadata = run(dialect, Path(db_dir))
+    metadata = run(dialect, Path("tests/models"))
+    captured = capsys.readouterr()
+    assert captured.out == expected_ddl
+    metadata.clear()
+
+
+@pytest.mark.parametrize(
+    "dialect, expected_ddl_file",
+    [
+        (Dialect.postgresql, "tests/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/ddl_mysql.sql"),
+    ],
+)
+def test_run_old_models(
+    dialect: Dialect,
+    expected_ddl_file: str,
+    capsys: CaptureFixture,
+) -> None:
+    with open(expected_ddl_file, "r") as f:
+        expected_ddl = f.read()
+    metadata = run(dialect, Path("tests/old_models"))
+    captured = capsys.readouterr()
+    assert captured.out == expected_ddl
+    metadata.clear()
+
+
+@pytest.mark.parametrize(
+    "dialect, expected_ddl_file",
+    [
+        (Dialect.postgresql, "tests/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/ddl_mysql.sql"),
+    ],
+)
+def test_run_models_2(
+    dialect: Dialect,
+    expected_ddl_file: str,
+    capsys: CaptureFixture,
+) -> None:
+    with open(expected_ddl_file, "r") as f:
+        expected_ddl = f.read()
+    metadata = run(dialect, Path("tests/tables"))
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
     metadata.clear()
@@ -44,6 +84,10 @@ def test_get_old_metadata() -> None:
     metadata.clear()
 
 
+@pytest.mark.skipif(
+    sqlalchemy_version() < (2, 0),
+    reason="requires SQLAlchemy>=2.0",
+)
 def test_get_metadata_explicit_path() -> None:
     metadata = get_metadata(Path("tests/models"))
     assert isinstance(metadata, MetaData)
@@ -55,11 +99,19 @@ def test_get_metadata_explicit_path_fail() -> None:
         get_metadata(Path("nothing/here"))
 
 
+@pytest.mark.skipif(
+    sqlalchemy_version() < (2, 0),
+    reason="requires SQLAlchemy>=2.0",
+)
 def test_get_metadata_invalid_models() -> None:
     with pytest.raises(ModuleImportError):
         get_metadata(Path("tests/invalid_models"))
 
 
+@pytest.mark.skipif(
+    sqlalchemy_version() < (2, 0),
+    reason="requires SQLAlchemy>=2.0",
+)
 def test_get_metadata_invalid_models_skip_errors() -> None:
     metadata = get_metadata(Path("tests/invalid_models"), skip_errors=True)
     assert isinstance(metadata, MetaData)
