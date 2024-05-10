@@ -1,51 +1,66 @@
-from atlas_provider_sqlalchemy.main import run, get_declarative_base, Dialect
 from pathlib import Path
-from sqlalchemy.orm import DeclarativeBase
+
 import pytest
+from pytest import CaptureFixture
+from sqlalchemy import MetaData
+
+from atlas_provider_sqlalchemy.main import (
+    Dialect,
+    ModuleImportError,
+    ModelsNotFoundError,
+    get_metadata,
+    run,
+)
 
 
-def test_run_postgres(capsys):
-    with open('tests/ddl_postgres.sql', 'r') as f:
+@pytest.mark.parametrize(
+    "dialect, expected_ddl_file",
+    [
+        (Dialect.postgresql, "tests/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/ddl_mysql.sql"),
+    ],
+)
+@pytest.mark.parametrize(
+    "db_dir",
+    ["tests/models", "tests/old_models", "tests/tables"],
+)
+def test_run_models(
+    dialect: Dialect,
+    expected_ddl_file: str,
+    db_dir: str,
+    capsys: CaptureFixture,
+) -> None:
+    with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read()
-    base = run(Dialect.postgresql, Path("tests/models"))
+    metadata = run(dialect, Path(db_dir))
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
-    base.metadata.clear()
+    metadata.clear()
 
 
-def test_run_mysql(capsys):
-    with open('tests/ddl_mysql.sql', 'r') as f:
-        expected_ddl = f.read()
-    base = run(Dialect.mysql, Path("tests/models"))
-    captured = capsys.readouterr()
-    assert captured.out == expected_ddl
-    base.metadata.clear()
+def test_get_old_metadata() -> None:
+    metadata = get_metadata(Path("tests/old_models"))
+    assert isinstance(metadata, MetaData)
+    metadata.clear()
 
 
-def test_run_old_declarative_base(capsys):
-    with open('tests/ddl_mysql.sql', 'r') as f:
-        expected_ddl = f.read()
-    base = run(Dialect.mysql, Path("tests/old_models"))
-    captured = capsys.readouterr()
-    assert captured.out == expected_ddl
-    base.metadata.clear()
+def test_get_metadata_explicit_path() -> None:
+    metadata = get_metadata(Path("tests/models"))
+    assert isinstance(metadata, MetaData)
+    metadata.clear()
 
 
-def test_get_old_declarative_base():
-    base = get_declarative_base(Path("tests/old_models"))
-    assert not issubclass(base, DeclarativeBase)
-    base.metadata.clear()
+def test_get_metadata_explicit_path_fail() -> None:
+    with pytest.raises(ModelsNotFoundError):
+        get_metadata(Path("nothing/here"))
 
 
-def test_get_declarative_base_explicit_path():
-    base = get_declarative_base(Path("tests/models"))
-    assert issubclass(base, DeclarativeBase)
-    base.metadata.clear()
+def test_get_metadata_invalid_models() -> None:
+    with pytest.raises(ModuleImportError):
+        get_metadata(Path("tests/invalid_models"))
 
 
-def test_get_declarative_base_explicit_path_fail(capsys):
-    with pytest.raises(SystemExit):
-        base = get_declarative_base(Path("nothing/here"))
-        base.metadata.clear()
-    captured = capsys.readouterr()
-    assert captured.out == 'Found no sqlalchemy models in the directory tree.\n'
+def test_get_metadata_invalid_models_skip_errors() -> None:
+    metadata = get_metadata(Path("tests/invalid_models"), skip_errors=True)
+    assert isinstance(metadata, MetaData)
+    metadata.clear()

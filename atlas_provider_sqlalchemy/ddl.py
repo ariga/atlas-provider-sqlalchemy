@@ -2,67 +2,76 @@ import os
 import importlib.util
 import inspect
 from pathlib import Path
-from sqlalchemy import create_mock_engine
-from sqlalchemy.orm import DeclarativeBase
-from typing import Type, Set, List
+from typing import Protocol
+
+from sqlalchemy import MetaData, create_mock_engine
+
+
+class DBTableDesc(Protocol):
+    """Database table description (SQLAlchemy table or model)."""
+
+    metadata: MetaData
+
+
+class ModuleImportError(Exception):
+    pass
 
 
 class ModelsNotFoundError(Exception):
     pass
 
 
-def get_declarative_base(models_dir: Path, skip_errors: bool = False) -> Type[DeclarativeBase]:
-    """
-    Walk the directory tree starting at the root, import all models, and return 1 of them, as they all keep a
-    reference to the Metadata object. The way sqlalchemy works, you must import all classes in order for them to be
-    registered in Metadata.
+def get_metadata(db_dir: Path, skip_errors: bool = False) -> MetaData:
+    """Walk the directory tree starting at the root, import all models and
+    tables, and return metadata for one of them, as they all keep a reference
+    to the `MetaData` object.  The way SQLAlchemy works, you must import all
+    models and tables in order for them to be registered in metadata.
     """
 
-    models: Set[Type[DeclarativeBase]] = set()
-    for root, _, _ in os.walk(models_dir):
-        python_file_paths = Path(root).glob('*.py')
+    metadata: set[MetaData] = set()
+
+    for root, _, _ in os.walk(db_dir):
+        python_file_paths = Path(root).glob("*.py")
         for file_path in python_file_paths:
             try:
                 module_spec = importlib.util.spec_from_file_location(
-                    file_path.stem, file_path)
+                    file_path.stem,
+                    file_path,
+                )
                 if module_spec and module_spec.loader:
                     module = importlib.util.module_from_spec(module_spec)
                     module_spec.loader.exec_module(module)
             except Exception as e:
                 if skip_errors:
                     continue
-                print(f'{e.__class__.__name__}: {str(e)} in {file_path}')
-                print("To skip on failed import, run: atlas-provider-sqlalchemy --skip-errors")
-                exit(1)
-                continue
-            classes = {c[1]
-                       for c in inspect.getmembers(module, inspect.isclass)
-                       if hasattr(c[1], "metadata") and c[1] is not DeclarativeBase}
-            models.update(classes)
-    if not models:
-        print('Found no sqlalchemy models in the directory tree.')
-        exit(1)
-    return models.pop()
+
+                raise ModuleImportError(f"{e.__class__.__name__}: {str(e)} in {file_path}")
+
+            ms = {
+                v.metadata
+                for (_, v) in inspect.getmembers(module)
+                if hasattr(v, "metadata") and isinstance(v.metadata, MetaData)
+            }
+            metadata.update(ms)
+
+    if not metadata:
+        raise ModelsNotFoundError("Found no sqlalchemy models/tables in the directory tree.")
+
+    return metadata.pop()
 
 
-def dump_ddl(dialect_driver: str, base: Type[DeclarativeBase]) -> Type[DeclarativeBase]:
-    """
-    Creates a mock engine and dumps its DDL to stdout
-    """
+def dump_ddl(dialect_driver: str, metadata: MetaData) -> MetaData:
+    """Dump DDL statements for the given metadata to stdout."""
 
     def dump(sql, *multiparams, **params):
-        print(str(sql.compile(dialect=engine.dialect)).replace('\t', '').replace('\n', ''), end=';\n\n')
+        print(str(sql.compile(dialect=engine.dialect)).replace("\t", "").replace("\n", ""), end=";\n\n")
 
-    engine = create_mock_engine(f'{dialect_driver}://', dump)
-    base.metadata.create_all(engine, checkfirst=False)
-    return base
-
-
-def get_import_path_from_path(path: Path, root_dir: Path) -> str:
-    import_path = '.'.join(path.relative_to(
-        root_dir).parts).replace(path.suffix, '')
-    return import_path
+    engine = create_mock_engine(f"{dialect_driver}://", dump)
+    metadata.create_all(engine, checkfirst=False)
+    return metadata
 
 
-def print_ddl(dialect_driver: str, models: List[Type[DeclarativeBase]]):
-    dump_ddl(dialect_driver=dialect_driver, base=models[0])
+def print_ddl(dialect_driver: str, models: list[DBTableDesc]) -> None:
+    """Dump DDL statements for the metadata from the given models/tables to stdout."""
+
+    dump_ddl(dialect_driver=dialect_driver, metadata=models[0].metadata)

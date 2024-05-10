@@ -1,10 +1,16 @@
 import os
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
+
 import typer
-from sqlalchemy.orm import DeclarativeBase
-from typing import Type
-from atlas_provider_sqlalchemy.ddl import get_declarative_base, dump_ddl
+from sqlalchemy import MetaData
+
+from atlas_provider_sqlalchemy.ddl import (
+    ModuleImportError,
+    ModelsNotFoundError,
+    dump_ddl,
+    get_metadata,
+)
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -17,9 +23,9 @@ class Dialect(str, Enum):
     mssql = "mssql"
 
 
-def run(dialect: Dialect, path: Path, skip_errors: bool = False) -> Type[DeclarativeBase]:
-    base = get_declarative_base(path, skip_errors)
-    return dump_ddl(dialect.value, base)
+def run(dialect: Dialect, path: Path, skip_errors: bool = False) -> MetaData:
+    metadata = get_metadata(path, skip_errors)
+    return dump_ddl(dialect.value, metadata)
 
 
 @app.command()
@@ -29,8 +35,16 @@ def load(dialect: Dialect = Dialect.mysql,
          ):
     if path is None:
         path = Path(os.getcwd())
-    run(dialect, path, skip_errors)
+    try:
+        run(dialect, path, skip_errors)
+    except ModuleImportError as e:
+        print(e)
+        print("To skip on failed import, run: atlas-provider-sqlalchemy --skip-errors")
+        exit(1)
+    except ModelsNotFoundError as e:
+        print(e)
+        exit(1)
 
 
 if __name__ == "__main__":
-    app(prog_name='atlas-provider-sqlalchemy')
+    app(prog_name="atlas-provider-sqlalchemy")
