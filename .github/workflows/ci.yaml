@@ -24,8 +24,13 @@ jobs:
           key: venv-${{ hashFiles('poetry.lock') }}
       - name: Install the project dependencies
         run: poetry install
+      - uses: actions/cache@v3
+        name: Define a cache for the tox based on the tox config file
+        with:
+          path: ./.tox
+          key: tox-${{ hashFiles('tox.ini') }}
       - name: Run unit tests
-        run: poetry run pytest
+        run: poetry run tox
       - name: Run lint
         run: poetry run ruff --output-format=github .
 
@@ -52,7 +57,7 @@ jobs:
           path: ./.venv
           key: venv-${{ hashFiles('poetry.lock') }}
       - name: Install the project dependencies
-        run: poetry install
+        run: poetry install --with inttests
       - name: Install atlas
         uses: ariga/setup-atlas@master
       - name: Run Test as Standalone
