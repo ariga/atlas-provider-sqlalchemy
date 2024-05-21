@@ -27,7 +27,7 @@ jobs:
         run: |
           echo "tag=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
           if [ -z "${{ github.event.inputs.version }}" ]; then
-              echo "tag=${{ github.ref }}" >> $GITHUB_OUTPUT
+              echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
           fi
       - name: Set the package version
         env:
