@@ -2,7 +2,7 @@ import os
 import importlib.util
 import inspect
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Protocol, Tuple, List
 
 import sqlalchemy as sa
 
@@ -21,7 +21,7 @@ class ModelsNotFoundError(Exception):
     pass
 
 
-def sqlalchemy_version() -> tuple[int, ...]:
+def sqlalchemy_version() -> Tuple[int, ...]:
     """Get major and minor version of sqlalchemy."""
 
     return tuple(int(x) for x in sa.__version__.split("."))
@@ -86,7 +86,7 @@ def dump_ddl(dialect_driver: str, metadata: sa.MetaData) -> sa.MetaData:
     return metadata
 
 
-def print_ddl(dialect_driver: str, models: list[DBTableDesc]) -> None:
+def print_ddl(dialect_driver: str, models: List[DBTableDesc]) -> None:
     """Dump DDL statements for the metadata from the given models/tables to stdout."""
 
     dump_ddl(dialect_driver=dialect_driver, metadata=models[0].metadata)
