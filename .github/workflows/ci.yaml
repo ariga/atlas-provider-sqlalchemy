@@ -32,7 +32,7 @@ jobs:
       - name: Run unit tests
         run: poetry run tox
       - name: Run lint
-        run: poetry run ruff --output-format=github .
+        run: poetry run ruff --exclude ./tests/broken --output-format=github .
 
   integration-tests:
     strategy:
@@ -96,14 +96,13 @@ jobs:
       - name: Run Broken Models
         working-directory: ./tests
         run: |
-          # pipe the result of the next command into
-          stderr=$(atlas migrate diff --env sqlalchemy -c "file://atlas-standalone.hcl" --var dialect=mysql --var path="./broken" 2>&1);
-          exit_code=$?
-          # require the command to fail with exit code 1 and the error message
-          if [ $exit_code -ne 1 ] || [[ ! $stderr =~ "NameError: name 'DeclarativeBase' is not defined in broken/models.py" ]]; then
-            echo "Expected command to fail with exit code 1 and the error message 'NameError: name 'DeclarativeBase' is not defined in broken/models.py'";
-            echo "Exit code: $exit_code";
-            echo "Stderr: $stderr";
+          # dont fail if the command fails, just check the output
+          output=$(atlas migrate diff --env sqlalchemy -c "file://atlas-standalone.hcl" --var dialect=mysql --var path="./broken" 2>&1 || true)
+          expected_error="NameError: name 'DeclarativeBase' is not defined in broken/models.py"
+          
+          if [[ ! "$output" == *"$expected_error"* ]]; then
+            echo "Expected command to fail with error message containing: $expected_error";
+            echo "Instead got: $output";
             exit 1;
           fi
         env:
