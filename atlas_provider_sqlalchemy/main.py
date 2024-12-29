@@ -1,4 +1,5 @@
 import os
+import sys
 from enum import Enum
 from pathlib import Path
 
@@ -38,11 +39,11 @@ def load(dialect: Dialect = Dialect.mysql,
     try:
         run(dialect, path, skip_errors)
     except ModuleImportError as e:
-        print(e)
-        print("To skip on failed import, run: atlas-provider-sqlalchemy --skip-errors")
+        print(e, file=sys.stderr)
+        print("To skip on failed import, run: atlas-provider-sqlalchemy --skip-errors", file=sys.stderr)
         exit(1)
     except ModelsNotFoundError as e:
-        print(e)
+        print(e, file=sys.stderr)
         exit(1)
 
 

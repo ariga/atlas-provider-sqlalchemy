@@ -32,7 +32,7 @@ jobs:
       - name: Run unit tests
         run: poetry run tox
       - name: Run lint
-        run: poetry run ruff --output-format=github .
+        run: poetry run ruff --exclude ./tests/broken --output-format=github .
 
   integration-tests:
     strategy:
@@ -93,3 +93,17 @@ jobs:
             git --no-pager diff
             exit 1
            fi
+      - name: Run Broken Models
+        working-directory: ./tests
+        run: |
+          # dont fail if the command fails, just check the output
+          output=$(atlas migrate diff --env sqlalchemy -c "file://atlas-standalone.hcl" --var dialect=mysql --var path="./broken" 2>&1 || true)
+          expected_error="NameError: name 'DeclarativeBase' is not defined in broken/models.py"
+          
+          if [[ ! "$output" == *"$expected_error"* ]]; then
+            echo "Expected command to fail with error message containing: $expected_error";
+            echo "Instead got: $output";
+            exit 1;
+          fi
+        env:
+          ATLAS_TOKEN: ${{ secrets.ATLAS_TOKEN }}
