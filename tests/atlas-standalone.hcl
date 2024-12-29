@@ -2,6 +2,11 @@ variable "dialect" {
   type = string
 }
 
+variable "path" {
+  type = string
+  default = "models"
+}
+
 locals {
   dev_url = {
     mysql = "docker://mysql/8/dev"
@@ -17,7 +22,7 @@ data "external_schema" "sqlalchemy" {
     "run",
     "python3",
     "../atlas_provider_sqlalchemy/main.py",
-    "--path", "models",
+    "--path", var.path,
     "--dialect", var.dialect, // mysql | postgresql | sqlite | mssql
   ]
 }

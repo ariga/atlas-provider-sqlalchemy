@@ -93,3 +93,18 @@ jobs:
             git --no-pager diff
             exit 1
            fi
+      - name: Run Broken Models
+        working-directory: ./tests
+        run: |
+          # pipe the result of the next command into
+          stderr=$(atlas migrate diff --env sqlalchemy -c "file://atlas-standalone.hcl" --var dialect=mysql --var path="./broken" 2>&1);
+          exit_code=$?
+          # require the command to fail with exit code 1 and the error message
+          if [ $exit_code -ne 1 ] || [[ ! $stderr =~ "NameError: name 'DeclarativeBase' is not defined in broken/models.py" ]]; then
+            echo "Expected command to fail with exit code 1 and the error message 'NameError: name 'DeclarativeBase' is not defined in broken/models.py'";
+            echo "Exit code: $exit_code";
+            echo "Stderr: $stderr";
+            exit 1;
+          fi
+        env:
+          ATLAS_TOKEN: ${{ secrets.ATLAS_TOKEN }}
