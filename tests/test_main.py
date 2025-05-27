@@ -13,7 +13,6 @@ from atlas_provider_sqlalchemy.main import (
     run,
 )
 
-
 @pytest.mark.skipif(
     sqlalchemy_version() < (2, 0),
     reason="requires SQLAlchemy>=2.0",
@@ -21,8 +20,8 @@ from atlas_provider_sqlalchemy.main import (
 @pytest.mark.parametrize(
     "dialect, expected_ddl_file",
     [
-        (Dialect.postgresql, "tests/ddl_postgres.sql"),
-        (Dialect.mysql, "tests/ddl_mysql.sql"),
+        (Dialect.postgresql, "tests/models/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/models/ddl_mysql.sql"),
     ],
 )
 def test_run_models(
@@ -41,8 +40,8 @@ def test_run_models(
 @pytest.mark.parametrize(
     "dialect, expected_ddl_file",
     [
-        (Dialect.postgresql, "tests/ddl_postgres.sql"),
-        (Dialect.mysql, "tests/ddl_mysql.sql"),
+        (Dialect.postgresql, "tests/old_models/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/old_models/ddl_mysql.sql"),
     ],
 )
 def test_run_old_models(
@@ -61,8 +60,8 @@ def test_run_old_models(
 @pytest.mark.parametrize(
     "dialect, expected_ddl_file",
     [
-        (Dialect.postgresql, "tests/ddl_postgres.sql"),
-        (Dialect.mysql, "tests/ddl_mysql.sql"),
+        (Dialect.postgresql, "tests/tables/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/tables/ddl_mysql.sql"),
     ],
 )
 def test_run_models_2(

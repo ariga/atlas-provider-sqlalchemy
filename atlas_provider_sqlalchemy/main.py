@@ -11,6 +11,7 @@ from atlas_provider_sqlalchemy.ddl import (
     ModelsNotFoundError,
     dump_ddl,
     get_metadata,
+    get_file_directives
 )
 
 app = typer.Typer(no_args_is_help=True)
@@ -26,7 +27,8 @@ class Dialect(str, Enum):
 
 def run(dialect: Dialect, path: Path, skip_errors: bool = False) -> MetaData:
     metadata = get_metadata(path, skip_errors)
-    return dump_ddl(dialect.value, metadata)
+    directives = get_file_directives(path)
+    return dump_ddl(dialect.value, metadata, directives)
 
 
 @app.command()
