@@ -30,7 +30,7 @@ def test_run_models(
     capsys: CaptureFixture,
 ) -> None:
     with open(expected_ddl_file, "r") as f:
-        expected_ddl = f.read()
+        expected_ddl = f.read().replace("[ABS_PATH]",str(Path.cwd()))
     metadata = run(dialect, Path("tests/models"))
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
@@ -50,7 +50,7 @@ def test_run_old_models(
     capsys: CaptureFixture,
 ) -> None:
     with open(expected_ddl_file, "r") as f:
-        expected_ddl = f.read()
+        expected_ddl = f.read().replace("[ABS_PATH]",str(Path.cwd()))
     metadata = run(dialect, Path("tests/old_models"))
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
@@ -70,7 +70,7 @@ def test_run_models_2(
     capsys: CaptureFixture,
 ) -> None:
     with open(expected_ddl_file, "r") as f:
-        expected_ddl = f.read()
+        expected_ddl = f.read().replace("[ABS_PATH]",str(Path.cwd()))
     metadata = run(dialect, Path("tests/tables"))
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
