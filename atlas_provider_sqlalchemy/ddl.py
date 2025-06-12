@@ -101,13 +101,13 @@ def get_metadata_file(file: Path) -> sa.MetaData:
 
 def get_file_directives(db_dir: Path) -> list[str]:
     """Get all file directives from the given directory."""
-
     directives = []
     for root, _, files in os.walk(db_dir):
         for file in files:
             if file.endswith(".py"):
                 # Parse the file for directives
                 file_path = Path(root) / file
+                abs_file_path = file_path.absolute()
                 visitor = parser.parse_file(file_path)
                 metadata = get_metadata_file(file_path)
                 # Extract table directives
@@ -116,9 +116,8 @@ def get_file_directives(db_dir: Path) -> list[str]:
                         # If table_name is not in metadata, skip it
                         if table_name not in metadata.tables:
                             continue
-                        directive = f"atlas:pos {table_name}[type=table] {file_path}:{line_number}"
+                        directive = f"atlas:pos {table_name}[type=table] {abs_file_path}:{line_number}"
                         directives.append(directive)
-     
     return directives
 
 
