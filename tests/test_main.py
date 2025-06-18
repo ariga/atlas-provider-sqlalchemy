@@ -56,6 +56,25 @@ def test_run_old_models(
     assert captured.out == expected_ddl
     metadata.clear()
 
+@pytest.mark.parametrize(
+    "dialect, expected_ddl_file",
+    [
+        (Dialect.postgresql, "tests/structured_models/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/structured_models/ddl_mysql.sql"),
+    ],
+)
+def test_run_structured_models(
+    dialect: Dialect,
+    expected_ddl_file: str,
+    capsys: CaptureFixture,
+) -> None:
+    with open(expected_ddl_file, "r") as f:
+        expected_ddl = f.read().replace("[ABS_PATH]",str(Path.cwd()))
+    metadata = run(dialect, Path("tests/structured_models/models"))
+    captured = capsys.readouterr()
+    assert captured.out == expected_ddl
+    metadata.clear()
+
 
 @pytest.mark.parametrize(
     "dialect, expected_ddl_file",
