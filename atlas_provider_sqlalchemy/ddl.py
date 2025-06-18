@@ -74,32 +74,7 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
 
     return metadata.pop()
 
-def get_metadata_file(file: Path) -> sa.MetaData:
-    """Get metadata from a single file."""
-
-    if not file.is_file() or not file.suffix == ".py":
-        raise ModelsNotFoundError(f"File {file} is not a valid Python file.")
-
-    try:
-        module_spec = importlib.util.spec_from_file_location(file.stem, file)
-        if module_spec and module_spec.loader:
-            module = importlib.util.module_from_spec(module_spec)
-            module_spec.loader.exec_module(module)
-    except Exception as e:
-        raise ModuleImportError(f"{e.__class__.__name__}: {str(e)} in {file}")
-
-    metadata = {
-        v.metadata
-        for (_, v) in inspect.getmembers(module)
-        if hasattr(v, "metadata") and isinstance(v.metadata, sa.MetaData)
-    }
-
-    if not metadata:
-        raise ModelsNotFoundError(f"No sqlalchemy models/tables found in {file}.")
-
-    return metadata.pop()
-
-def get_file_directives(db_dir: Path) -> list[str]:
+def get_file_directives(db_dir: Path, metadata: sa.MetaData) -> list[str]:
     """Get all file directives from the given directory."""
     directives = []
     for root, _, files in os.walk(db_dir):
@@ -109,7 +84,6 @@ def get_file_directives(db_dir: Path) -> list[str]:
                 file_path = Path(root) / file
                 abs_file_path = file_path.absolute()
                 visitor = parser.parse_file(file_path)
-                metadata = get_metadata_file(file_path)
                 # Extract table directives
                 if visitor.tables:
                     for table_name, (line_number, _ ) in visitor.tables.items():

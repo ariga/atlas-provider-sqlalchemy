@@ -27,7 +27,7 @@ class Dialect(str, Enum):
 
 def run(dialect: Dialect, path: Path, skip_errors: bool = False) -> MetaData:
     metadata = get_metadata(path, skip_errors)
-    directives = get_file_directives(path)
+    directives = get_file_directives(path, metadata)
     return dump_ddl(dialect.value, metadata, directives)
 
 
