@@ -132,6 +132,57 @@ The provider supports the following databases:
 * SQLite
 * Microsoft SQL Server
 
+### FAQ
+
+#### How to include schema creation in the migration?
+
+Sometimes your tables may not reside in the default schema, and you may want to create the schema as part of the migration.
+
+you can utilize [composite schemas](https://atlasgo.io/atlas-schema/projects#data-source-composite_schema) to add custom DDL in addition to the SQLAlchemy schema.
+
+change your `atlas.hcl` like this:
+
+```hcl
+
+data "external_schema" "sqlalchemy" {
+  program = [
+    "atlas-provider-sqlalchemy",
+    "--path", "./path/to/models",
+    "--dialect", "postgresql"
+  ]
+}
+
+data "composite_schema" "app" {
+    # Create the test schema first
+    schema "public" {
+        url = "file://schema.sql"
+    }
+   # Next, load the sqlalchemy models.
+    schema "public" {
+        url = data.external_schema.sqlalchemy.url
+    }
+}
+
+env "sqlalchemy" {
+  src = data.composite_schema.app.url
+  dev = "docker://postgres/16/dev"
+  migration {
+    dir = "file://migrations"
+  }
+  format {
+    migrate {
+      diff = "{{ sql . \"  \" }}"
+    }
+  }
+}
+```
+
+and create a `schema.sql` file with the following contents (change the schema name as needed):
+
+```sql
+CREATE SCHEMA IF NOT EXISTS test;
+```
+
 ### Credit
 
 The code in this repository is based on [noamtamir/atlas-provider-sqlalchemy](https://github.com/noamtamir/atlas-provider-sqlalchemy).
