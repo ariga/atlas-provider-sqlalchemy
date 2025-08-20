@@ -58,12 +58,9 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
                 unique_module_name = f"{prefix}_{file_mtime}"
                 
                 # Clear any existing module with similar names from sys.modules
-                modules_to_remove = [
-                    name for name in sys.modules.keys() 
-                    if name.startswith(prefix)
-                ]
-                for module_name in modules_to_remove:
-                    del sys.modules[module_name]
+                for name in list(sys.modules):
+                    if name.startswith(prefix):
+                        del sys.modules[name]
                 
                 # Also invalidate import caches to force fresh loading
                 importlib.invalidate_caches()
