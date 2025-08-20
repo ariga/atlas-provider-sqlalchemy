@@ -1,4 +1,6 @@
 import os
+import sys
+import importlib
 import importlib.util
 import inspect
 from pathlib import Path
@@ -49,8 +51,22 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
         python_file_paths = Path(root).glob("*.py")
         for file_path in python_file_paths:
             try:
+                # Use a unique module name that includes file modification time
+                # to avoid caching issues that can occur after git branch switches
+                prefix = f"atlas_dynamic_module_{abs(hash(str(file_path.absolute())))}"
+                file_mtime = int(file_path.stat().st_mtime)
+                unique_module_name = f"{prefix}_{file_mtime}"
+                
+                # Clear any existing module with similar names from sys.modules
+                for name in list(sys.modules):
+                    if name.startswith(prefix):
+                        del sys.modules[name]
+                
+                # Also invalidate import caches to force fresh loading
+                importlib.invalidate_caches()
+                
                 module_spec = importlib.util.spec_from_file_location(
-                    file_path.stem,
+                    unique_module_name,
                     file_path,
                 )
                 if module_spec and module_spec.loader:
