@@ -53,13 +53,14 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
             try:
                 # Use a unique module name that includes file modification time
                 # to avoid caching issues that can occur after git branch switches
+                prefix = f"atlas_dynamic_module_{abs(hash(str(file_path.absolute())))}"
                 file_mtime = int(file_path.stat().st_mtime)
-                unique_module_name = f"atlas_dynamic_module_{abs(hash(str(file_path.absolute())))}_{file_mtime}"
+                unique_module_name = f"{prefix}_{file_mtime}"
                 
                 # Clear any existing module with similar names from sys.modules
                 modules_to_remove = [
                     name for name in sys.modules.keys() 
-                    if name.startswith(f"atlas_dynamic_module_{abs(hash(str(file_path.absolute())))}")
+                    if name.startswith(prefix)
                 ]
                 for module_name in modules_to_remove:
                     del sys.modules[module_name]
