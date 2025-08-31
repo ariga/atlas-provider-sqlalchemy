@@ -82,6 +82,29 @@ def test_run_structured_models(
 
 
 @pytest.mark.parametrize(
+    "dialect",
+    [Dialect.postgresql, Dialect.mysql],
+)
+def test_run_multiple_paths(
+    dialect: Dialect,
+    capsys: CaptureFixture,
+) -> None:
+    with open(f"tests/testdata/multi_path/ddl_{dialect.value}.sql", "r") as f:
+        expected_ddl = f.read().replace("[ABS_PATH]", str(Path.cwd()))
+    metadata = run(
+        dialect,
+        [
+            Path("tests/testdata/multi_path/models1"),
+            Path("tests/testdata/multi_path/models2"),
+        ],
+    )
+    captured = capsys.readouterr()
+    assert captured.out == expected_ddl
+    for m in metadata:
+        m.clear()
+
+
+@pytest.mark.parametrize(
     "dialect, expected_ddl_file",
     [
         (Dialect.postgresql, "tests/testdata/tables/ddl_postgres.sql"),
