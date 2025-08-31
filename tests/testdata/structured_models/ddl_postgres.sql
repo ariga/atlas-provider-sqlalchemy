@@ -1,5 +1,5 @@
--- atlas:pos user_account[type=table] [ABS_PATH]/tests/old_models/models.py:10
--- atlas:pos address[type=table] [ABS_PATH]/tests/old_models/models.py:18
+-- atlas:pos user_account[type=table] /home/noam/src/atlas-provider-sqlalchemy/tests/testdata/structured_models/models/user.py:8
+-- atlas:pos address[type=table] /home/noam/src/atlas-provider-sqlalchemy/tests/testdata/structured_models/models/user.py:21
 
 CREATE TABLE user_account (id SERIAL NOT NULL, name VARCHAR(30) NOT NULL, fullname VARCHAR(30), PRIMARY KEY (id));
 

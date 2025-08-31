@@ -4,7 +4,7 @@ import pytest
 from pytest import CaptureFixture
 from sqlalchemy import MetaData
 
-from atlas_provider_sqlalchemy.ddl import sqlalchemy_version
+from atlas_provider_sqlalchemy.ddl import sqlalchemy_version, print_ddl
 from atlas_provider_sqlalchemy.main import (
     Dialect,
     ModuleImportError,
@@ -21,8 +21,8 @@ from atlas_provider_sqlalchemy.main import (
 @pytest.mark.parametrize(
     "dialect, expected_ddl_file",
     [
-        (Dialect.postgresql, "tests/models/ddl_postgres.sql"),
-        (Dialect.mysql, "tests/models/ddl_mysql.sql"),
+        (Dialect.postgresql, "tests/testdata/models/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/testdata/models/ddl_mysql.sql"),
     ],
 )
 def test_run_models(
@@ -32,7 +32,7 @@ def test_run_models(
 ) -> None:
     with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read().replace("[ABS_PATH]", str(Path.cwd()))
-    metadata = run(dialect, Path("tests/models"))
+    metadata = run(dialect, Path("tests/testdata/models"))
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
     metadata.clear()
@@ -41,8 +41,8 @@ def test_run_models(
 @pytest.mark.parametrize(
     "dialect, expected_ddl_file",
     [
-        (Dialect.postgresql, "tests/old_models/ddl_postgres.sql"),
-        (Dialect.mysql, "tests/old_models/ddl_mysql.sql"),
+        (Dialect.postgresql, "tests/testdata/old_models/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/testdata/old_models/ddl_mysql.sql"),
     ],
 )
 def test_run_old_models(
@@ -52,7 +52,7 @@ def test_run_old_models(
 ) -> None:
     with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read().replace("[ABS_PATH]", str(Path.cwd()))
-    metadata = run(dialect, Path("tests/old_models"))
+    metadata = run(dialect, Path("tests/testdata/old_models"))
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
     metadata.clear()
@@ -61,8 +61,8 @@ def test_run_old_models(
 @pytest.mark.parametrize(
     "dialect, expected_ddl_file",
     [
-        (Dialect.postgresql, "tests/structured_models/ddl_postgres.sql"),
-        (Dialect.mysql, "tests/structured_models/ddl_mysql.sql"),
+        (Dialect.postgresql, "tests/testdata/structured_models/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/testdata/structured_models/ddl_mysql.sql"),
     ],
 )
 def test_run_structured_models(
@@ -72,7 +72,7 @@ def test_run_structured_models(
 ) -> None:
     with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read().replace("[ABS_PATH]", str(Path.cwd()))
-    metadata = run(dialect, Path("tests/structured_models/models"))
+    metadata = run(dialect, Path("tests/testdata/structured_models/models"))
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
     metadata.clear()
@@ -81,8 +81,8 @@ def test_run_structured_models(
 @pytest.mark.parametrize(
     "dialect, expected_ddl_file",
     [
-        (Dialect.postgresql, "tests/tables/ddl_postgres.sql"),
-        (Dialect.mysql, "tests/tables/ddl_mysql.sql"),
+        (Dialect.postgresql, "tests/testdata/tables/ddl_postgres.sql"),
+        (Dialect.mysql, "tests/testdata/tables/ddl_mysql.sql"),
     ],
 )
 def test_run_models_2(
@@ -92,14 +92,14 @@ def test_run_models_2(
 ) -> None:
     with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read().replace("[ABS_PATH]", str(Path.cwd()))
-    metadata = run(dialect, Path("tests/tables"))
+    metadata = run(dialect, Path("tests/testdata/tables"))
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
     metadata.clear()
 
 
 def test_get_old_metadata() -> None:
-    metadata = get_metadata(Path("tests/old_models"))
+    metadata = get_metadata(Path("tests/testdata/old_models"))
     assert isinstance(metadata, MetaData)
     metadata.clear()
 
@@ -109,7 +109,7 @@ def test_get_old_metadata() -> None:
     reason="requires SQLAlchemy>=2.0",
 )
 def test_get_metadata_explicit_path() -> None:
-    metadata = get_metadata(Path("tests/models"))
+    metadata = get_metadata(Path("tests/testdata/models"))
     assert isinstance(metadata, MetaData)
     metadata.clear()
 
@@ -125,7 +125,7 @@ def test_get_metadata_explicit_path_fail() -> None:
 )
 def test_get_metadata_invalid_models() -> None:
     with pytest.raises(ModuleImportError):
-        get_metadata(Path("tests/invalid_models"))
+        get_metadata(Path("tests/testdata/invalid_models"))
 
 
 @pytest.mark.skipif(
@@ -133,6 +133,6 @@ def test_get_metadata_invalid_models() -> None:
     reason="requires SQLAlchemy>=2.0",
 )
 def test_get_metadata_invalid_models_skip_errors() -> None:
-    metadata = get_metadata(Path("tests/invalid_models"), skip_errors=True)
+    metadata = get_metadata(Path("tests/testdata/invalid_models"), skip_errors=True)
     assert isinstance(metadata, MetaData)
     metadata.clear()

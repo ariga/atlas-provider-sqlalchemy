@@ -20,11 +20,11 @@ project-excludes = [
     "**/node_modules",
     "**/__pycache__",
     "**/*venv/**/*",
-    "tests/broken/**/*",
+    "tests/testdata/**/*",
 ]
 
 [tool.ruff]
-exclude = ["tests/broken/**/*"]
+exclude = ["tests/testdata/**/*"]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
