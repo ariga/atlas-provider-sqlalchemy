@@ -4,9 +4,9 @@ This module provides utilities to locate tables, columns, and other SQL
 elements in SQLAlchemy model definitions using source code analysis.
 """
 
-from pathlib import Path
-from typing import Dict, Optional, Tuple, Any
+from typing import Any
 import ast
+from pathlib import Path
 
 
 class SQLAlchemyModelVisitor(ast.NodeVisitor):
@@ -15,9 +15,9 @@ class SQLAlchemyModelVisitor(ast.NodeVisitor):
     def __init__(self):
         super().__init__()
         # Store table information: {table_name: (line_number, class_node)}
-        self.tables: Dict[str, Tuple[int, Any]] = {}
+        self.tables: dict[str, tuple[int, Any]] = {}
         # Current table being visited
-        self.current_table: Optional[str] = None
+        self.current_table: str | None = None
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """Visit a class definition and check if it's a SQLAlchemy model."""

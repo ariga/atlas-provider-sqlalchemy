@@ -32,10 +32,11 @@ def test_run_models(
 ) -> None:
     with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read().replace("[ABS_PATH]", str(Path.cwd()))
-    metadata = run(dialect, Path("tests/testdata/models"))
+    metadata = run(dialect, [Path("tests/testdata/models")])
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
-    metadata.clear()
+    for m in metadata:
+        m.clear()
 
 
 @pytest.mark.parametrize(
@@ -52,10 +53,11 @@ def test_run_old_models(
 ) -> None:
     with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read().replace("[ABS_PATH]", str(Path.cwd()))
-    metadata = run(dialect, Path("tests/testdata/old_models"))
+    metadata = run(dialect, [Path("tests/testdata/old_models")])
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
-    metadata.clear()
+    for m in metadata:
+        m.clear()
 
 
 @pytest.mark.parametrize(
@@ -72,10 +74,11 @@ def test_run_structured_models(
 ) -> None:
     with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read().replace("[ABS_PATH]", str(Path.cwd()))
-    metadata = run(dialect, Path("tests/testdata/structured_models/models"))
+    metadata = run(dialect, [Path("tests/testdata/structured_models/models")])
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
-    metadata.clear()
+    for m in metadata:
+        m.clear()
 
 
 @pytest.mark.parametrize(
@@ -92,10 +95,11 @@ def test_run_models_2(
 ) -> None:
     with open(expected_ddl_file, "r") as f:
         expected_ddl = f.read().replace("[ABS_PATH]", str(Path.cwd()))
-    metadata = run(dialect, Path("tests/testdata/tables"))
+    metadata = run(dialect, [Path("tests/testdata/tables")])
     captured = capsys.readouterr()
     assert captured.out == expected_ddl
-    metadata.clear()
+    for m in metadata:
+        m.clear()
 
 
 def test_get_old_metadata() -> None:

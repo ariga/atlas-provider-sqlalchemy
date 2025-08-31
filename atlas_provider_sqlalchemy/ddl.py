@@ -137,9 +137,10 @@ def dump_ddl(
         print()
     engine = create_mock_engine(f"{dialect_driver}://", dump)
     metadata.create_all(engine, checkfirst=False)
-    return metadata
 
 
 def print_ddl(dialect_driver: str, models: list[DBTableDesc]) -> None:
     """Dump DDL statements for the metadata from the given models/tables to stdout."""
+    if len(models) == 0:
+        print("No models provided", file=sys.stderr)
     dump_ddl(dialect_driver=dialect_driver, metadata=models[0].metadata, directives=[])

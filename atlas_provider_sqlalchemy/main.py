@@ -25,22 +25,28 @@ class Dialect(str, Enum):
     mssql = "mssql"
 
 
-def run(dialect: Dialect, path: Path, skip_errors: bool = False) -> MetaData:
-    metadata = get_metadata(path, skip_errors)
-    directives = get_file_directives(path, metadata)
-    return dump_ddl(dialect.value, metadata, directives)
+def run(
+    dialect: Dialect, path: list[Path], skip_errors: bool = False
+) -> list[MetaData]:
+    metadata_list = []
+    for p in path:
+        metadata = get_metadata(p, skip_errors)
+        directives = get_file_directives(p, metadata)
+        dump_ddl(dialect.value, metadata, directives)
+        metadata_list.append(metadata)
+    return metadata_list
 
 
 @app.command()
 def load(
     dialect: Dialect = Dialect.mysql,
-    path: Path = typer.Option(
+    path: list[Path] = typer.Option(
         exists=True, help="Path to directory of the sqlalchemy models."
     ),
     skip_errors: bool = typer.Option(False, help="Skip errors when loading models."),
 ):
-    if path is None:
-        path = Path(os.getcwd())
+    if not path:
+        path = [Path(os.getcwd())]
     try:
         run(dialect, path, skip_errors)
     except ModuleImportError as e:
