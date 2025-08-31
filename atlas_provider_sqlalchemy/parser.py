@@ -4,6 +4,7 @@ This module provides utilities to locate tables, columns, and other SQL
 elements in SQLAlchemy model definitions using source code analysis.
 """
 
+from pathlib import Path
 from typing import Dict, Optional, Tuple, Any
 import ast
 
@@ -27,8 +28,10 @@ class SQLAlchemyModelVisitor(ast.NodeVisitor):
             if isinstance(statement, ast.Assign) and len(statement.targets) == 1:
                 target = statement.targets[0]
                 if isinstance(target, ast.Name) and target.id == "__tablename__":
-                    if isinstance(statement.value, ast.Str):
-                        table_name = statement.value.s
+                    if isinstance(statement.value, ast.Str) and isinstance(
+                        statement.value.value, str
+                    ):
+                        table_name = statement.value.value
                         self.tables[table_name] = (line_number, node)
                         break
 
@@ -45,15 +48,15 @@ class SQLAlchemyModelVisitor(ast.NodeVisitor):
                 is_table_call = True
             if is_table_call and node.value.args:
                 first_arg = node.value.args[0]
-                if isinstance(first_arg, ast.Str):
-                    table_name = first_arg.s
+                if isinstance(first_arg, ast.Str) and isinstance(first_arg.value, str):
+                    table_name = first_arg.value
                     self.tables[table_name] = (node.lineno, node)
 
         # Continue visiting child nodes
         self.generic_visit(node)
 
 
-def parse_file(file_path: str) -> SQLAlchemyModelVisitor:
+def parse_file(file_path: str | Path) -> SQLAlchemyModelVisitor:
     """Parse a Python file and extract SQLAlchemy model information.
 
     Args:

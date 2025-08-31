@@ -118,7 +118,7 @@ def get_file_directives(db_dir: Path, metadata: sa.MetaData) -> list[str]:
 
 
 def dump_ddl(
-    dialect_driver: str, metadata: sa.MetaData, directives: [str]
+    dialect_driver: str, metadata: sa.MetaData, directives: list[str]
 ) -> sa.MetaData:
     """Dump DDL statements for the given metadata to stdout."""
 
