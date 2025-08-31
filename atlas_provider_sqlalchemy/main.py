@@ -28,12 +28,13 @@ class Dialect(str, Enum):
 def run(
     dialect: Dialect, path: list[Path], skip_errors: bool = False
 ) -> list[MetaData]:
-    metadata_list = []
+    metadata_list: list[MetaData] = []
+    directives = []
     for p in path:
-        metadata = get_metadata(p, skip_errors)
-        directives = get_file_directives(p, metadata)
-        dump_ddl(dialect.value, metadata, directives)
-        metadata_list.append(metadata)
+        m = get_metadata(p, skip_errors)
+        metadata_list.append(m)
+        directives.extend(get_file_directives(p, m))
+    dump_ddl(dialect.value, metadata_list, directives)
     return metadata_list
 
 

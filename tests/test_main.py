@@ -4,7 +4,7 @@ import pytest
 from pytest import CaptureFixture
 from sqlalchemy import MetaData
 
-from atlas_provider_sqlalchemy.ddl import sqlalchemy_version
+from atlas_provider_sqlalchemy.ddl import sqlalchemy_version, print_ddl
 from atlas_provider_sqlalchemy.main import (
     Dialect,
     ModuleImportError,
@@ -123,6 +123,13 @@ def test_run_models_2(
     assert captured.out == expected_ddl
     for m in metadata:
         m.clear()
+
+
+def test_print_ddl_no_models(capsys: CaptureFixture) -> None:
+    print_ddl(Dialect.mysql.value, [])
+    captured = capsys.readouterr()
+    assert captured.out == ""
+    assert captured.err == "No models provided\n"
 
 
 def test_get_old_metadata() -> None:

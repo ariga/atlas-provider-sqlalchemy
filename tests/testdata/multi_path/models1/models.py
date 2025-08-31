@@ -15,17 +15,6 @@ class User(Base):
         back_populates="user", cascade="all, delete-orphan"
     )
 
-
-class Bla(Base):
-    __tablename__ = "blabla"
-    id: Mapped[int] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    fullname: Mapped[str | None] = mapped_column(String(30))
-    addresses: Mapped[list["Address"]] = relationship(
-        back_populates="user", cascade="all, delete-orphan"
-    )
-
-
 class Address(Base):
     __tablename__ = "address"
     id: Mapped[int] = mapped_column(primary_key=True)
