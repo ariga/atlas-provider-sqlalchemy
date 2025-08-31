@@ -4,7 +4,7 @@ import pytest
 from pytest import CaptureFixture
 from sqlalchemy import MetaData
 
-from atlas_provider_sqlalchemy.ddl import sqlalchemy_version, print_ddl
+from atlas_provider_sqlalchemy.ddl import sqlalchemy_version
 from atlas_provider_sqlalchemy.main import (
     Dialect,
     ModuleImportError,

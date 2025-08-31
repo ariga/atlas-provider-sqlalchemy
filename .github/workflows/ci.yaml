@@ -102,8 +102,8 @@ jobs:
         working-directory: ./tests
         run: |
           # dont fail if the command fails, just check the output
-          output=$(atlas migrate diff --env sqlalchemy -c "file://atlas-standalone.hcl" --var dialect=mysql --var path="./broken" 2>&1 || true)
-          expected_error="NameError: name 'DeclarativeBase' is not defined in broken/models.py"
+          output=$(atlas migrate diff --env sqlalchemy -c "file://atlas-standalone.hcl" --var dialect=mysql --var path="./testdata/broken" 2>&1 || true)
+          expected_error="NameError: name 'DeclarativeBase' is not defined in testdata/broken/models.py"
 
           if [[ ! "$output" == *"$expected_error"* ]]; then
             echo "Expected command to fail with error message containing: $expected_error";
