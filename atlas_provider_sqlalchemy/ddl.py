@@ -9,6 +9,7 @@ from atlas_provider_sqlalchemy import parser
 
 import sqlalchemy as sa
 
+
 class DBTableDesc(Protocol):
     """Database table description (SQLAlchemy table or model)."""
 
@@ -56,15 +57,15 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
                 prefix = f"atlas_dynamic_module_{abs(hash(str(file_path.absolute())))}"
                 file_mtime = int(file_path.stat().st_mtime)
                 unique_module_name = f"{prefix}_{file_mtime}"
-                
+
                 # Clear any existing module with similar names from sys.modules
                 for name in list(sys.modules):
                     if name.startswith(prefix):
                         del sys.modules[name]
-                
+
                 # Also invalidate import caches to force fresh loading
                 importlib.invalidate_caches()
-                
+
                 module_spec = importlib.util.spec_from_file_location(
                     unique_module_name,
                     file_path,
@@ -76,7 +77,9 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
                 if skip_errors:
                     continue
 
-                raise ModuleImportError(f"{e.__class__.__name__}: {str(e)} in {file_path}")
+                raise ModuleImportError(
+                    f"{e.__class__.__name__}: {str(e)} in {file_path}"
+                )
 
             ms = {
                 v.metadata
@@ -86,9 +89,12 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
             metadata.update(ms)
 
     if not metadata:
-        raise ModelsNotFoundError("Found no sqlalchemy models/tables in the directory tree.")
+        raise ModelsNotFoundError(
+            "Found no sqlalchemy models/tables in the directory tree."
+        )
 
     return metadata.pop()
+
 
 def get_file_directives(db_dir: Path, metadata: sa.MetaData) -> list[str]:
     """Get all file directives from the given directory."""
@@ -102,7 +108,7 @@ def get_file_directives(db_dir: Path, metadata: sa.MetaData) -> list[str]:
                 visitor = parser.parse_file(file_path)
                 # Extract table directives
                 if visitor.tables:
-                    for table_name, (line_number, _ ) in visitor.tables.items():
+                    for table_name, (line_number, _) in visitor.tables.items():
                         # If table_name is not in metadata, skip it
                         if table_name not in metadata.tables:
                             continue
@@ -111,10 +117,18 @@ def get_file_directives(db_dir: Path, metadata: sa.MetaData) -> list[str]:
     return directives
 
 
-def dump_ddl(dialect_driver: str, metadata: sa.MetaData, directives: [str]) -> sa.MetaData:
+def dump_ddl(
+    dialect_driver: str, metadata: sa.MetaData, directives: [str]
+) -> sa.MetaData:
     """Dump DDL statements for the given metadata to stdout."""
+
     def dump(sql, *multiparams, **params):
-        print(str(sql.compile(dialect=engine.dialect)).replace("\t", "").replace("\n", ""), end=";\n\n")
+        print(
+            str(sql.compile(dialect=engine.dialect))
+            .replace("\t", "")
+            .replace("\n", ""),
+            end=";\n\n",
+        )
 
     """Add File directives to the DDL dump."""
     if directives:

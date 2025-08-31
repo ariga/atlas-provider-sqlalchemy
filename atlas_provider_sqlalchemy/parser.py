@@ -7,6 +7,7 @@ elements in SQLAlchemy model definitions using source code analysis.
 from typing import Dict, Optional, Tuple, Any
 import ast
 
+
 class SQLAlchemyModelVisitor(ast.NodeVisitor):
     """Visit AST nodes to find SQLAlchemy model definitions."""
 
@@ -20,7 +21,7 @@ class SQLAlchemyModelVisitor(ast.NodeVisitor):
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         """Visit a class definition and check if it's a SQLAlchemy model."""
         line_number = node.lineno
-        
+
         # Check for __tablename__ attribute in the class body
         for statement in node.body:
             if isinstance(statement, ast.Assign) and len(statement.targets) == 1:
@@ -30,7 +31,7 @@ class SQLAlchemyModelVisitor(ast.NodeVisitor):
                         table_name = statement.value.s
                         self.tables[table_name] = (line_number, node)
                         break
-        
+
         # Continue visiting child nodes
         self.generic_visit(node)
 
@@ -47,32 +48,33 @@ class SQLAlchemyModelVisitor(ast.NodeVisitor):
                 if isinstance(first_arg, ast.Str):
                     table_name = first_arg.s
                     self.tables[table_name] = (node.lineno, node)
-        
+
         # Continue visiting child nodes
         self.generic_visit(node)
 
+
 def parse_file(file_path: str) -> SQLAlchemyModelVisitor:
     """Parse a Python file and extract SQLAlchemy model information.
-    
+
     Args:
         file_path: Path to the Python file
-        
+
     Returns:
         SQLAlchemyModelVisitor: A visitor instance containing found tables and columns.
-        
+
     Raises:
         FileNotFoundError: If the file cannot be found
         Exception: If there are parsing errors
     """
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             source_code = f.read()
-        
+
         # Parse the source code with ast
         module = ast.parse(source_code, filename=file_path)
         visitor = SQLAlchemyModelVisitor()
         visitor.visit(module)
-        
+
         return visitor
     except FileNotFoundError:
         raise FileNotFoundError(f"Could not find file: {file_path}")
