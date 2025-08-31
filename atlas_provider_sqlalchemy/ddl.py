@@ -118,8 +118,8 @@ def get_file_directives(db_dir: Path, metadata: sa.MetaData) -> list[str]:
 
 
 def dump_ddl(
-    dialect_driver: str, metadata: sa.MetaData, directives: list[str]
-) -> sa.MetaData:
+    dialect_driver: str, metadata: list[sa.MetaData], directives: list[str]
+) -> list[sa.MetaData]:
     """Dump DDL statements for the given metadata to stdout."""
 
     def dump(sql, *multiparams, **params):
@@ -136,10 +136,16 @@ def dump_ddl(
             print(f"-- {directive}")
         print()
     engine = create_mock_engine(f"{dialect_driver}://", dump)
-    metadata.create_all(engine, checkfirst=False)
+    for meta in metadata:
+        meta.create_all(engine, checkfirst=False)
     return metadata
 
 
 def print_ddl(dialect_driver: str, models: list[DBTableDesc]) -> None:
     """Dump DDL statements for the metadata from the given models/tables to stdout."""
-    dump_ddl(dialect_driver=dialect_driver, metadata=models[0].metadata, directives=[])
+    if len(models) == 0:
+        print("No models provided", file=sys.stderr)
+        return
+    dump_ddl(
+        dialect_driver=dialect_driver, metadata=[models[0].metadata], directives=[]
+    )
