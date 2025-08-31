@@ -1,7 +1,7 @@
 import sys
 
 from atlas_provider_sqlalchemy.ddl import print_ddl
-from tests.models.models import User, Address
+from tests.testdata.models.models import User, Address
 
 # get the dialect from the command line
 dialect = sys.argv[1]
