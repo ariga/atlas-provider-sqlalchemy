@@ -11,7 +11,7 @@ from atlas_provider_sqlalchemy.ddl import (
     ModelsNotFoundError,
     dump_ddl,
     get_metadata,
-    get_file_directives
+    get_file_directives,
 )
 
 app = typer.Typer(no_args_is_help=True)
@@ -32,17 +32,23 @@ def run(dialect: Dialect, path: Path, skip_errors: bool = False) -> MetaData:
 
 
 @app.command()
-def load(dialect: Dialect = Dialect.mysql,
-         path: Path = typer.Option(exists=True, help="Path to directory of the sqlalchemy models."),
-         skip_errors: bool = typer.Option(False, help="Skip errors when loading models.")
-         ):
+def load(
+    dialect: Dialect = Dialect.mysql,
+    path: Path = typer.Option(
+        exists=True, help="Path to directory of the sqlalchemy models."
+    ),
+    skip_errors: bool = typer.Option(False, help="Skip errors when loading models."),
+):
     if path is None:
         path = Path(os.getcwd())
     try:
         run(dialect, path, skip_errors)
     except ModuleImportError as e:
         print(e, file=sys.stderr)
-        print("To skip on failed import, run: atlas-provider-sqlalchemy --skip-errors", file=sys.stderr)
+        print(
+            "To skip on failed import, run: atlas-provider-sqlalchemy --skip-errors",
+            file=sys.stderr,
+        )
         exit(1)
     except ModelsNotFoundError as e:
         print(e, file=sys.stderr)

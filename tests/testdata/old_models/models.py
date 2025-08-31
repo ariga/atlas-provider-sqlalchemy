@@ -12,7 +12,9 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(30), nullable=False)
     fullname = Column(String(30))
-    addresses = relationship("Address", back_populates="user", cascade="all, delete-orphan")
+    addresses = relationship(
+        "Address", back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class Address(Base):
