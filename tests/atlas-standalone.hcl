@@ -4,7 +4,7 @@ variable "dialect" {
 
 variable "path" {
   type = string
-  default = "models"
+  default = "testdata/models"
 }
 
 locals {
