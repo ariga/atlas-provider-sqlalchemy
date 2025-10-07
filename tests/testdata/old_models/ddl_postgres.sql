@@ -1,5 +1,5 @@
--- atlas:pos user_account[type=table] [ABS_PATH]/tests/testdata/old_models/models.py:10
--- atlas:pos address[type=table] [ABS_PATH]/tests/testdata/old_models/models.py:20
+-- atlas:pos user_account[type=table] [ABS_PATH]/tests/testdata/old_models/models.py:11
+-- atlas:pos address[type=table] [ABS_PATH]/tests/testdata/old_models/models.py:23
 
 CREATE TABLE user_account (id SERIAL NOT NULL, name VARCHAR(30) NOT NULL, fullname VARCHAR(30), PRIMARY KEY (id));
 

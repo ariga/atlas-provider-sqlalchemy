@@ -13,6 +13,7 @@ locals {
     postgresql = "docker://postgres/15"
     sqlite = "sqlite://?mode=memory&_fk=1"
     mssql = "docker://sqlserver/2022-latest"
+    clickhouse = "docker://clickhouse/23.11/dev"
   }[var.dialect]
 }
 
@@ -23,7 +24,7 @@ data "external_schema" "sqlalchemy" {
     "python3",
     "../atlas_provider_sqlalchemy/main.py",
     "--path", var.path,
-    "--dialect", var.dialect, // mysql | postgresql | sqlite | mssql
+    "--dialect", var.dialect, // mysql | postgresql | sqlite | mssql | clickhouse
   ]
 }
 
