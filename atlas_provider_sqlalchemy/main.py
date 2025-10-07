@@ -23,6 +23,7 @@ class Dialect(str, Enum):
     postgresql = "postgresql"
     sqlite = "sqlite"
     mssql = "mssql"
+    clickhouse = "clickhouse"
 
 
 def run(

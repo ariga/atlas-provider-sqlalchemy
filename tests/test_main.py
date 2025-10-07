@@ -23,6 +23,7 @@ from atlas_provider_sqlalchemy.main import (
     [
         (Dialect.postgresql, "tests/testdata/models/ddl_postgres.sql"),
         (Dialect.mysql, "tests/testdata/models/ddl_mysql.sql"),
+        (Dialect.clickhouse, "tests/testdata/models/ddl_clickhouse.sql"),
     ],
 )
 def test_run_models(
@@ -44,6 +45,7 @@ def test_run_models(
     [
         (Dialect.postgresql, "tests/testdata/old_models/ddl_postgres.sql"),
         (Dialect.mysql, "tests/testdata/old_models/ddl_mysql.sql"),
+        (Dialect.clickhouse, "tests/testdata/old_models/ddl_clickhouse.sql"),
     ],
 )
 def test_run_old_models(
@@ -65,6 +67,7 @@ def test_run_old_models(
     [
         (Dialect.postgresql, "tests/testdata/structured_models/ddl_postgres.sql"),
         (Dialect.mysql, "tests/testdata/structured_models/ddl_mysql.sql"),
+        (Dialect.clickhouse, "tests/testdata/structured_models/ddl_clickhouse.sql"),
     ],
 )
 def test_run_structured_models(
@@ -83,7 +86,7 @@ def test_run_structured_models(
 
 @pytest.mark.parametrize(
     "dialect",
-    [Dialect.postgresql, Dialect.mysql],
+    [Dialect.postgresql, Dialect.mysql, Dialect.clickhouse],
 )
 def test_run_multiple_paths(
     dialect: Dialect,
@@ -109,6 +112,7 @@ def test_run_multiple_paths(
     [
         (Dialect.postgresql, "tests/testdata/tables/ddl_postgres.sql"),
         (Dialect.mysql, "tests/testdata/tables/ddl_mysql.sql"),
+        (Dialect.clickhouse, "tests/testdata/tables/ddl_clickhouse.sql"),
     ],
 )
 def test_run_models_2(

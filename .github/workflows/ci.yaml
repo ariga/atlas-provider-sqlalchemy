@@ -42,7 +42,7 @@ jobs:
   integration-tests:
     strategy:
       matrix:
-        dialect: [mysql, postgresql, sqlite, mssql]
+        dialect: [mysql, postgresql, sqlite, mssql, clickhouse]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

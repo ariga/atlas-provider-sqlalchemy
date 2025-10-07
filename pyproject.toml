@@ -10,6 +10,7 @@ packages = [{include = "atlas_provider_sqlalchemy"}]
 python = "^3.9"
 typer = ">0.9.0,<=1.0.0"
 sqlalchemy = "^2.0.41"
+clickhouse-sqlalchemy = "^0.3.2"
 
 [tool.pyrefly]
 project-includes = [

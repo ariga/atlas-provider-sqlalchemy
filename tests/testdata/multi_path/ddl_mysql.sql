@@ -1,7 +1,7 @@
--- atlas:pos user_account[type=table] [ABS_PATH]/tests/testdata/multi_path/models1/models.py:9
--- atlas:pos address[type=table] [ABS_PATH]/tests/testdata/multi_path/models1/models.py:18
--- atlas:pos user_account2[type=table] [ABS_PATH]/tests/testdata/multi_path/models2/models.py:9
--- atlas:pos address2[type=table] [ABS_PATH]/tests/testdata/multi_path/models2/models.py:19
+-- atlas:pos user_account[type=table] [ABS_PATH]/tests/testdata/multi_path/models1/models.py:10
+-- atlas:pos address[type=table] [ABS_PATH]/tests/testdata/multi_path/models1/models.py:21
+-- atlas:pos user_account2[type=table] [ABS_PATH]/tests/testdata/multi_path/models2/models.py:10
+-- atlas:pos address2[type=table] [ABS_PATH]/tests/testdata/multi_path/models2/models.py:22
 
 CREATE TABLE user_account (id INTEGER NOT NULL AUTO_INCREMENT, name VARCHAR(30) NOT NULL, fullname VARCHAR(30), PRIMARY KEY (id));
 
