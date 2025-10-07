@@ -131,6 +131,7 @@ The provider supports the following databases:
 * PostgreSQL
 * SQLite
 * Microsoft SQL Server
+* ClickHouse
 
 ### FAQ
 
