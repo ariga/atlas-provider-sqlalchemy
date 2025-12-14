@@ -28,7 +28,7 @@ class SQLAlchemyModelVisitor(ast.NodeVisitor):
             if isinstance(statement, ast.Assign) and len(statement.targets) == 1:
                 target = statement.targets[0]
                 if isinstance(target, ast.Name) and target.id == "__tablename__":
-                    if isinstance(statement.value, ast.Str) and isinstance(
+                    if isinstance(statement.value, ast.Constant) and isinstance(
                         statement.value.value, str
                     ):
                         table_name = statement.value.value
@@ -48,7 +48,9 @@ class SQLAlchemyModelVisitor(ast.NodeVisitor):
                 is_table_call = True
             if is_table_call and node.value.args:
                 first_arg = node.value.args[0]
-                if isinstance(first_arg, ast.Str) and isinstance(first_arg.value, str):
+                if isinstance(first_arg, ast.Constant) and isinstance(
+                    first_arg.value, str
+                ):
                     table_name = first_arg.value
                     self.tables[table_name] = (node.lineno, node)
 
