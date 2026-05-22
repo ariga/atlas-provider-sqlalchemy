@@ -14,13 +14,13 @@ jobs:
   build_and_publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Install Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c # v4
         with:
           python-version: '3.14'
       - name: Install poetry
-        uses: abatilo/actions-poetry@v2
+        uses: abatilo/actions-poetry@a5643c67b5fcc9ac5eddb395c7f61b1b66d86034 # v2
       - name: Set version env
         id: set_version
         ## if version is not provided as input, use the tag name
@@ -35,6 +35,6 @@ jobs:
         run: |
           poetry version $RELEASE_VERSION
       - name: Build and publish to pypi
-        uses: JRubics/poetry-publish@v1.17
+        uses: JRubics/poetry-publish@b71e946be561eaf8bfb7562ecc97c26fb8583070 # v1.17
         with:
           pypi_token: ${{ secrets.PYPI_TOKEN }}
