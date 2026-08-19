@@ -132,6 +132,7 @@ The provider supports the following databases:
 * SQLite
 * Microsoft SQL Server
 * ClickHouse
+* Snoflake
 
 ### FAQ
 
