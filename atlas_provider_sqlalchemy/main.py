@@ -24,6 +24,7 @@ class Dialect(str, Enum):
     sqlite = "sqlite"
     mssql = "mssql"
     clickhouse = "clickhouse"
+    snowflake = "snowflake"
 
 
 def run(
