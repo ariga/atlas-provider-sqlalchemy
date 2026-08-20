@@ -13,6 +13,9 @@ on:
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - name: Install Python
@@ -34,7 +37,7 @@ jobs:
           RELEASE_VERSION: ${{ steps.set_version.outputs.tag }}
         run: |
           poetry version $RELEASE_VERSION
-      - name: Build and publish to pypi
-        uses: JRubics/poetry-publish@b71e946be561eaf8bfb7562ecc97c26fb8583070 # v1.17
-        with:
-          pypi_token: ${{ secrets.PYPI_TOKEN }}
+      - name: Build the package
+        run: poetry build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
