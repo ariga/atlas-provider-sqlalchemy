@@ -10,7 +10,6 @@ packages = [{include = "atlas_provider_sqlalchemy"}]
 python = "^3.9"
 typer = ">0.9.0,<=1.0.0"
 sqlalchemy = "^2.0.41"
-clickhouse-sqlalchemy = "^0.3.2"
 
 [tool.pyrefly]
 project-includes = [
@@ -34,6 +33,7 @@ ruff = "^0.12.11"
 autopep8 = "^2.0.4"
 sqlalchemy = "^2.0.41"
 pyrefly = "^0.30.0"
+clickhouse-sqlalchemy = "^0.3.2"
 
 [tool.poetry.group.inttests]
 optional = true
