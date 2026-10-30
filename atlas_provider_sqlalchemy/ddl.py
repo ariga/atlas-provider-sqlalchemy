@@ -39,14 +39,15 @@ def create_mock_engine(url: str, executor: Any) -> Any:
         return sa.create_mock_engine(url, executor)
 
 
-def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
+def get_metadata(db_dir: Path, skip_errors: bool = False) -> list[sa.MetaData]:
     """Walk the directory tree starting at the root, import all models and
-    tables, and return metadata for one of them, as they all keep a reference
-    to the `MetaData` object.  The way SQLAlchemy works, you must import all
-    models and tables in order for them to be registered in metadata.
+    tables, and return every distinct `MetaData` object they reference, in the
+    order found. Models built on different declarative bases each have their
+    own `MetaData`.  The way SQLAlchemy works, you must import all models and
+    tables in order for them to be registered in metadata.
     """
 
-    metadata: set[sa.MetaData] = set()
+    metadata: dict[sa.MetaData, None] = {}
 
     for root, _, _ in os.walk(db_dir):
         python_file_paths = Path(root).glob("*.py")
@@ -81,11 +82,11 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
                     f"{e.__class__.__name__}: {str(e)} in {file_path}"
                 )
 
-            ms = {
+            ms = dict.fromkeys(
                 v.metadata
                 for (_, v) in inspect.getmembers(module)
                 if hasattr(v, "metadata") and isinstance(v.metadata, sa.MetaData)
-            }
+            )
             metadata.update(ms)
 
     if not metadata:
@@ -93,10 +94,25 @@ def get_metadata(db_dir: Path, skip_errors: bool = False) -> sa.MetaData:
             "Found no sqlalchemy models/tables in the directory tree."
         )
 
-    return metadata.pop()
+    return list(metadata)
 
 
-def get_file_directives(db_dir: Path, metadata: sa.MetaData) -> list[str]:
+def drop_redundant_metadata(metadata: list[sa.MetaData]) -> list[sa.MetaData]:
+    """Drop metadata whose tables all appear in another one, like the partial
+    copy left when a file is imported both by path and by module name."""
+    tables = [set(meta.tables) for meta in metadata]
+    return [
+        meta
+        for i, meta in enumerate(metadata)
+        if not any(
+            tables[i] < other or (j < i and tables[i] == other)
+            for j, other in enumerate(tables)
+            if j != i
+        )
+    ]
+
+
+def get_file_directives(db_dir: Path, metadata: list[sa.MetaData]) -> list[str]:
     """Get all file directives from the given directory."""
     directives = []
     for root, _, files in os.walk(db_dir):
@@ -110,7 +126,7 @@ def get_file_directives(db_dir: Path, metadata: sa.MetaData) -> list[str]:
                 if visitor.tables:
                     for table_name, (line_number, _) in visitor.tables.items():
                         # If table_name is not in metadata, skip it
-                        if table_name not in metadata.tables:
+                        if not any(table_name in m.tables for m in metadata):
                             continue
                         directive = f"atlas:pos {table_name}[type=table] {abs_file_path}:{line_number}"
                         directives.append(directive)
@@ -136,7 +152,7 @@ def dump_ddl(
             print(f"-- {directive}")
         print()
     engine = create_mock_engine(f"{dialect_driver}://", dump)
-    for meta in metadata:
+    for meta in drop_redundant_metadata(metadata):
         meta.create_all(engine, checkfirst=False)
     return metadata
 
