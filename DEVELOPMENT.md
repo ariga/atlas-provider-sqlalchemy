@@ -14,7 +14,7 @@ This document provides instructions for developers who want to contribute to or 
 
 ### Prerequisites
 
-- Python 3.9 or newer
+- Python 3.11 or newer
 - [Poetry](https://python-poetry.org/) for dependency management
 - [Atlas CLI](https://atlasgo.io/getting-started#installation)
 
