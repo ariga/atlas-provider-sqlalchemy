@@ -136,6 +136,41 @@ def test_print_ddl_no_models(capsys: CaptureFixture) -> None:
     assert captured.err == "No models provided\n"
 
 
+@pytest.mark.skipif(
+    sqlalchemy_version() < (2, 0),
+    reason="requires SQLAlchemy>=2.0",
+)
+def test_print_ddl_multiple_bases(capsys: CaptureFixture) -> None:
+    from sqlalchemy import Integer
+    from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
+    class FirstBase(DeclarativeBase):
+        pass
+
+    class SecondBase(DeclarativeBase):
+        pass
+
+    class Users(FirstBase):
+        __tablename__ = "users"
+        id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    class Orders(FirstBase):
+        __tablename__ = "orders"
+        id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    class Sessions(SecondBase):
+        __tablename__ = "sessions"
+        id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    print_ddl(Dialect.postgresql.value, [Users, Sessions, Orders])
+    captured = capsys.readouterr()
+    assert captured.out == (
+        "CREATE TABLE users (id SERIAL NOT NULL, PRIMARY KEY (id));\n\n"
+        "CREATE TABLE orders (id SERIAL NOT NULL, PRIMARY KEY (id));\n\n"
+        "CREATE TABLE sessions (id SERIAL NOT NULL, PRIMARY KEY (id));\n\n"
+    )
+
+
 def test_get_old_metadata() -> None:
     metadata = get_metadata(Path("tests/testdata/old_models"))
     assert isinstance(metadata, MetaData)

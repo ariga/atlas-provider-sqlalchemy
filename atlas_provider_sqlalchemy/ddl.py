@@ -146,6 +146,6 @@ def print_ddl(dialect_driver: str, models: list[DBTableDesc]) -> None:
     if len(models) == 0:
         print("No models provided", file=sys.stderr)
         return
-    dump_ddl(
-        dialect_driver=dialect_driver, metadata=[models[0].metadata], directives=[]
-    )
+    # Models may come from different declarative bases, each with its own metadata.
+    metadata = list(dict.fromkeys(model.metadata for model in models))
+    dump_ddl(dialect_driver=dialect_driver, metadata=metadata, directives=[])
