@@ -54,7 +54,7 @@ def test_module_caching_fix():
         create_sqlalchemy_model_file(models_file, "initial_table", "InitialModel")
 
         # Load metadata - should find the initial table
-        metadata1 = get_metadata(models_dir)
+        (metadata1,) = get_metadata(models_dir)
         assert "initial_table" in metadata1.tables
         assert len(metadata1.tables) == 1
 
@@ -78,7 +78,7 @@ class CompletelyDifferentModel(Base):
         models_file.write_text(modified_content)
 
         # Step 3: Load metadata again - should find the changed table
-        metadata2 = get_metadata(models_dir)
+        (metadata2,) = get_metadata(models_dir)
 
         # The fix should ensure we get the updated content
         # If this fails, it means caching is still an issue
@@ -118,8 +118,8 @@ def test_multiple_files_with_same_stem():
         create_sqlalchemy_model_file(file2, "table2", "Model2")
 
         # Load metadata from each directory separately
-        metadata1 = get_metadata(dir1)
-        metadata2 = get_metadata(dir2)
+        (metadata1,) = get_metadata(dir1)
+        (metadata2,) = get_metadata(dir2)
 
         # Verify each directory loads its own tables correctly
         assert "table1" in metadata1.tables
@@ -149,7 +149,7 @@ def test_file_modification_time_tracking():
         initial_mtime = models_file.stat().st_mtime
 
         # Load metadata
-        metadata1 = get_metadata(models_dir)
+        (metadata1,) = get_metadata(models_dir)
         assert "table_v1" in metadata1.tables
 
         # Wait and modify file to ensure different mtime
@@ -175,7 +175,7 @@ class ModelV2(Base):
         assert new_mtime > initial_mtime
 
         # Load metadata again - should reflect the changes
-        metadata2 = get_metadata(models_dir)
+        (metadata2,) = get_metadata(models_dir)
 
         try:
             assert "table_v2" in metadata2.tables

@@ -129,6 +129,29 @@ def test_run_models_2(
         m.clear()
 
 
+@pytest.mark.skipif(
+    sqlalchemy_version() < (2, 0),
+    reason="requires SQLAlchemy>=2.0",
+)
+def test_run_multiple_bases(capsys: CaptureFixture) -> None:
+    metadata = run(Dialect.postgresql, [Path("tests/testdata/multi_base")])
+    captured = capsys.readouterr()
+    for m in metadata:
+        m.clear()
+    # Files load in directory listing order, which varies by filesystem.
+    abs_path = Path.cwd() / "tests/testdata/multi_base"
+    assert sorted(line for line in captured.out.splitlines() if line) == sorted(
+        [
+            f"-- atlas:pos users[type=table] {abs_path}/users.py:9",
+            f"-- atlas:pos sessions[type=table] {abs_path}/sessions.py:8",
+            f"-- atlas:pos tokens[type=table] {abs_path}/tokens.py:8",
+            "CREATE TABLE users (id SERIAL NOT NULL, name VARCHAR(30) NOT NULL, PRIMARY KEY (id));",
+            "CREATE TABLE sessions (id SERIAL NOT NULL, PRIMARY KEY (id));",
+            "CREATE TABLE tokens (id SERIAL NOT NULL, session_id INTEGER NOT NULL, PRIMARY KEY (id), FOREIGN KEY(session_id) REFERENCES sessions (id));",
+        ]
+    )
+
+
 def test_print_ddl_no_models(capsys: CaptureFixture) -> None:
     print_ddl(Dialect.mysql.value, [])
     captured = capsys.readouterr()
@@ -172,7 +195,7 @@ def test_print_ddl_multiple_bases(capsys: CaptureFixture) -> None:
 
 
 def test_get_old_metadata() -> None:
-    metadata = get_metadata(Path("tests/testdata/old_models"))
+    (metadata,) = get_metadata(Path("tests/testdata/old_models"))
     assert isinstance(metadata, MetaData)
     metadata.clear()
 
@@ -182,7 +205,7 @@ def test_get_old_metadata() -> None:
     reason="requires SQLAlchemy>=2.0",
 )
 def test_get_metadata_explicit_path() -> None:
-    metadata = get_metadata(Path("tests/testdata/models"))
+    (metadata,) = get_metadata(Path("tests/testdata/models"))
     assert isinstance(metadata, MetaData)
     metadata.clear()
 
@@ -206,6 +229,6 @@ def test_get_metadata_invalid_models() -> None:
     reason="requires SQLAlchemy>=2.0",
 )
 def test_get_metadata_invalid_models_skip_errors() -> None:
-    metadata = get_metadata(Path("tests/testdata/invalid_models"), skip_errors=True)
+    (metadata,) = get_metadata(Path("tests/testdata/invalid_models"), skip_errors=True)
     assert isinstance(metadata, MetaData)
     metadata.clear()

@@ -33,9 +33,9 @@ def run(
     metadata_list: list[MetaData] = []
     directives = []
     for p in path:
-        m = get_metadata(p, skip_errors)
-        metadata_list.append(m)
-        directives.extend(get_file_directives(p, m))
+        ms = get_metadata(p, skip_errors)
+        metadata_list.extend(ms)
+        directives.extend(get_file_directives(p, ms))
     dump_ddl(dialect.value, metadata_list, directives)
     return metadata_list
 
